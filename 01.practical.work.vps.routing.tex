@@ -1,0 +1,121 @@
+% !TEX TS-program = xelatex
+% !TEX encoding = UTF-8
+
+% Header {{{1
+
+% This is a simple template for a XeLaTeX document using the "article" class,
+% with the fontspec package to easily select fonts.
+
+%\documentclass[11pt]{article} % use larger type; default would be 10pt
+\documentclass[12pt]{article}
+
+\usepackage{fontspec} % Font selection for XeLaTeX; see fontspec.pdf for documentation
+\defaultfontfeatures{Mapping=tex-text} % to support TeX conventions like ``---''
+\usepackage{xunicode} % Unicode support for LaTeX character names (accents, European chars, etc)
+\usepackage{xltxtra} % Extra customizations for XeLaTeX
+
+%\setmainfont{Charis SIL} % set the main body font (\textrm), assumes Charis SIL is installed
+%\setsansfont{Deja Vu Sans}
+%\setmonofont{Deja Vu Mono}
+
+% other LaTeX packages.....
+\usepackage{geometry} % See geometry.pdf to learn the layout options. There are lots.
+\geometry{a4paper, left=25mm, right=25mm, top=25mm, bottom=25mm} % or letterpaper (US) or a5paper or....
+\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+\usepackage{graphicx} % support the \includegraphics command and options
+\usepackage{subcaption}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily,columns=fullflexible,keepspaces=true}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Report 1: VPS setup \& routing}
+\author{Dinh Ngoc Tu}
+
+\begin{document}
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Connect with SSH}
+
+\begin{lstlisting}[breaklines]
+tu@DNT-LAPTOP:~$ ssh tu@172.16.0.1
+tu@172.16.0.1's password:
+tu@homeserver:~$
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Ping \texttt{usth.edu.vn}}
+
+\begin{lstlisting}[breaklines]
+$ ping -c 5 usth.edu.vn
+PING usth.edu.vn (42.112.27.174) 56(84) bytes of data.
+64 bytes from mail.usth.edu.vn (42.112.27.174): icmp_seq=1 ttl=54 time=2.98 ms
+64 bytes from mail.usth.edu.vn (42.112.27.174): icmp_seq=2 ttl=54 time=2.90 ms
+64 bytes from mail.usth.edu.vn (42.112.27.174): icmp_seq=3 ttl=54 time=2.81 ms
+64 bytes from mail.usth.edu.vn (42.112.27.174): icmp_seq=4 ttl=54 time=2.97 ms
+64 bytes from mail.usth.edu.vn (42.112.27.174): icmp_seq=5 ttl=54 time=2.90 ms
+
+--- usth.edu.vn ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4006ms
+rtt min/avg/max/mdev = 2.816/2.917/2.981/0.069 ms
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Route from remote server to \texttt{usth.edu.vn}}
+
+\begin{lstlisting}[breaklines]
+$ traceroute usth.edu.vn
+traceroute to usth.edu.vn (42.112.27.174), 30 hops max, 60 byte packets
+ 1  192.168.1.1 (192.168.1.1)  0.671 ms  0.723 ms  0.664 ms
+ 2  125.235.243.172.adsl.viettel.vn (125.235.243.172)  6.136 ms  6.077 ms  6.022 ms
+ 3  125.235.243.5.adsl.viettel.vn (125.235.243.5)  6.061 ms  5.989 ms  5.921 ms
+ 4  localhost (27.68.229.9)  7.889 ms localhost (27.68.229.49)  8.331 ms  8.270 ms
+ 5  localhost (27.68.228.38)  5.740 ms localhost (27.68.228.26)  5.982 ms localhost (27.68.228.38)  5.932 ms
+ 6  203.113.158.106 (203.113.158.106)  5.502 ms  4.349 ms  4.297 ms
+ 7  * * *
+ 8  * * *
+ 9  42.112.4.22 (42.112.4.22)  3.675 ms  3.623 ms  4.068 ms
+10  42.112.4.62 (42.112.4.62)  5.715 ms  5.602 ms 118.70.3.74 (118.70.3.74)  1065.786 ms
+11  mail.usth.edu.vn (42.112.27.174)  4.514 ms  2.888 ms  3.118 ms
+\end{lstlisting}
+
+There are $11$ hops.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Route from local machine to \texttt{usth.edu.vn}}
+
+\begin{lstlisting}[breaklines]
+$ traceroute usth.edu.vn
+traceroute to usth.edu.vn (42.112.27.174), 30 hops max, 60 byte packets
+ 1  192.168.1.1 (192.168.1.1)  2.257 ms  2.727 ms  2.720 ms
+ 2  192.168.6.1 (192.168.6.1)  3.021 ms  3.015 ms  3.009 ms
+ 3  static.netnam.vn (119.17.212.1)  7.252 ms  7.246 ms  7.239 ms
+ 4  * * *
+ 5  10.100.4.21 (10.100.4.21)  4.218 ms  4.212 ms  4.206 ms
+ 6  ci228-6.netnam.vn (210.86.228.6)  5.132 ms  2.999 ms  4.985 ms
+ 7  218.100.10.7 (218.100.10.7)  4.964 ms  5.469 ms  5.465 ms
+ 8  * * *
+ 9  * * *
+10  42.112.4.22 (42.112.4.22)  6.743 ms  6.811 ms  6.812 ms
+11  42.112.4.62 (42.112.4.62)  3.553 ms  5.678 ms *
+12  mail.usth.edu.vn (42.112.27.174)  5.240 ms  3.919 ms  3.891 ms
+\end{lstlisting}
+
+There are $12$ hops.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
