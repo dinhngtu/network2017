@@ -24,6 +24,10 @@ int main(int argc, char **argv) {
     }
 
     struct hostent *he = gethostbyname(name);
+    if (!he) {
+        printf("no such domain");
+        return 2;
+    }
     for (char **addr = he->h_addr_list; *addr; addr++) {
         struct in_addr ip;
         ip.s_addr = *(in_addr_t *)*addr;
