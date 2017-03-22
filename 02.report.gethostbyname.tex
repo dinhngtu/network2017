@@ -1,0 +1,149 @@
+% !TEX TS-program = xelatex
+% !TEX encoding = UTF-8
+
+% Header {{{1
+
+% This is a simple template for a XeLaTeX document using the "article" class,
+% with the fontspec package to easily select fonts.
+
+%\documentclass[11pt]{article} % use larger type; default would be 10pt
+\documentclass[12pt]{article}
+
+\usepackage{fontspec} % Font selection for XeLaTeX; see fontspec.pdf for documentation
+\defaultfontfeatures{Mapping=tex-text} % to support TeX conventions like ``---''
+\usepackage{xunicode} % Unicode support for LaTeX character names (accents, European chars, etc)
+\usepackage{xltxtra} % Extra customizations for XeLaTeX
+
+%\setmainfont{Charis SIL} % set the main body font (\textrm), assumes Charis SIL is installed
+%\setsansfont{Deja Vu Sans}
+%\setmonofont{Deja Vu Mono}
+
+% other LaTeX packages.....
+\usepackage{geometry} % See geometry.pdf to learn the layout options. There are lots.
+\geometry{a4paper, left=25mm, right=25mm, top=25mm, bottom=25mm} % or letterpaper (US) or a5paper or....
+\usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+\usepackage{graphicx} % support the \includegraphics command and options
+\usepackage{subcaption}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily,columns=fullflexible,keepspaces=true}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Report 1: VPS setup \& routing}
+\author{Dinh Ngoc Tu}
+
+\begin{document}
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{DNS resolution on local machine}
+
+First attempt:
+
+\begin{lstlisting}[breaklines]
+$ ./02.practical.work.gethostbyname
+Enter hostname: google.com
+resolved ip is 216.58.200.14
+\end{lstlisting}
+
+Second attempt:
+
+\begin{lstlisting}[breaklines]
+$ ./02.practical.work.gethostbyname
+Enter hostname: google.com
+resolved ip is 216.58.199.14
+\end{lstlisting}
+
+Third attempt:
+
+\begin{lstlisting}[breaklines]
+$ ./02.practical.work.gethostbyname
+Enter hostname: google.com
+resolved ip is 216.58.197.110
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{DNS resolution on remote machine}
+
+First attempt:
+
+\begin{lstlisting}[breaklines]
+$ ./02.practical.work.gethostbyname
+Enter hostname: google.com
+resolved ip is 125.235.36.123
+resolved ip is 125.235.36.113
+resolved ip is 125.235.36.93
+resolved ip is 125.235.36.104
+resolved ip is 125.235.36.94
+resolved ip is 125.235.36.114
+resolved ip is 125.235.36.109
+resolved ip is 125.235.36.84
+resolved ip is 125.235.36.119
+resolved ip is 125.235.36.103
+resolved ip is 125.235.36.98
+resolved ip is 125.235.36.118
+resolved ip is 125.235.36.108
+resolved ip is 125.235.36.88
+resolved ip is 125.235.36.99
+resolved ip is 125.235.36.89
+\end{lstlisting}
+
+Second attempt:
+
+\begin{lstlisting}[breaklines]
+$ ./02.practical.work.gethostbyname
+Enter hostname: google.com
+resolved ip is 125.235.36.123
+resolved ip is 125.235.36.113
+resolved ip is 125.235.36.93
+resolved ip is 125.235.36.104
+resolved ip is 125.235.36.94
+resolved ip is 125.235.36.114
+resolved ip is 125.235.36.109
+resolved ip is 125.235.36.84
+resolved ip is 125.235.36.119
+resolved ip is 125.235.36.103
+resolved ip is 125.235.36.98
+resolved ip is 125.235.36.118
+resolved ip is 125.235.36.108
+resolved ip is 125.235.36.88
+resolved ip is 125.235.36.99
+resolved ip is 125.235.36.89
+\end{lstlisting}
+
+Third attempt:
+
+\begin{lstlisting}[breaklines]
+$ ./02.practical.work.gethostbyname
+Enter hostname: google.com
+resolved ip is 125.235.17.119
+resolved ip is 125.235.17.108
+resolved ip is 125.235.17.84
+resolved ip is 125.235.17.89
+resolved ip is 125.235.17.93
+resolved ip is 125.235.17.118
+resolved ip is 125.235.17.88
+resolved ip is 125.235.17.114
+resolved ip is 125.235.17.94
+resolved ip is 125.235.17.113
+resolved ip is 125.235.17.98
+resolved ip is 125.235.17.103
+resolved ip is 125.235.17.123
+resolved ip is 125.235.17.104
+resolved ip is 125.235.17.99
+resolved ip is 125.235.17.109
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
