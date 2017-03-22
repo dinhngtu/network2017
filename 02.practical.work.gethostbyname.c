@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Bad name\n");
             return 1;
         }
-        name[nchar - 2] = 0; // erase the \n
+        name[nchar - 1] = 0; // erase the \n
     } else {
         name = argv[1];
     }
