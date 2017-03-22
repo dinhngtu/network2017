@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
     struct hostent *he = gethostbyname(name);
     if (!he) {
-        printf("no such domain");
+        printf("no such domain\n");
         return 2;
     }
     for (char **addr = he->h_addr_list; *addr; addr++) {
