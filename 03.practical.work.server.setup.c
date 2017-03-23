@@ -55,7 +55,7 @@ int main() {
         }
 
         char dummy;
-        while (read(clifd, &dummy, sizeof(char) > 0));
+        while (read(clifd, &dummy, sizeof(char)) > 0);
 
         if (close(clifd) != 0) {
             perror("error closing client connection");
