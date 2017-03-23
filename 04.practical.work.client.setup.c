@@ -15,18 +15,39 @@
 #define SV_PORT 8784
 #define BUFCOUNT 4096
 
-int main() {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        perror("error creating sockfd");
-        return 1;
+int main(int argc, char **argv) {
+    size_t namesize;
+    char *name = NULL;
+
+    if (argc == 1) {
+        printf("Enter hostname: ");
+        int nchar = getline(&name, &namesize, stdin);
+        if (nchar < 1) {
+            fprintf(stderr, "Bad name\n");
+            return 1;
+        }
+        name[nchar - 1] = 0; // erase the \n
+    } else {
+        name = argv[1];
+    }
+
+    struct hostent *he = gethostbyname(name);
+    if (!he) {
+        printf("no such domain\n");
+        return 2;
     }
 
     struct sockaddr_in sa;
     memset(&sa, 0, sizeof(struct sockaddr_in));
     sa.sin_family = AF_INET;
-    assert(inet_aton("127.0.0.1", &sa.sin_addr) != 0);
+    memcpy((char *)&sa.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
     sa.sin_port = htons(SV_PORT);
+
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("error creating sockfd");
+        return 1;
+    }
 
     if (connect(sockfd, (struct sockaddr *)&sa, sizeof(struct sockaddr_in)) < 0) {
         perror("error connecting");
