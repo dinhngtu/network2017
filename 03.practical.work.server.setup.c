@@ -44,8 +44,18 @@ int main() {
 
         if (write(clifd, "Welcome\n", 8 * sizeof(char)) <= 0) {
             perror("error writing to client");
+            close(clifd);
             continue;
         }
+
+        if (shutdown(clifd, SHUT_WR) != 0) {
+            perror("error shutting down socket");
+            close(clifd);
+            continue;
+        }
+
+        char dummy;
+        while (read(clifd, &dummy, sizeof(char) > 0));
 
         if (close(clifd) != 0) {
             perror("error closing client connection");

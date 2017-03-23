@@ -28,8 +28,7 @@ int main() {
     assert(inet_aton("127.0.0.1", &sa.sin_addr) != 0);
     sa.sin_port = htons(SV_PORT);
 
-    int connfd = connect(sockfd, (struct sockaddr *)&sa, sizeof(struct sockaddr_in));
-    if (connfd < 0) {
+    if (connect(sockfd, (struct sockaddr *)&sa, sizeof(struct sockaddr_in)) < 0) {
         perror("error connecting");
         return 1;
     }
@@ -38,14 +37,24 @@ int main() {
     char *buf = malloc(bufsize);
 
     ssize_t readsize;
-    while ((readsize = read(connfd, buf, bufsize)) > 0) {
-        write(1, buf, readsize * sizeof(char));
+    while ((readsize = read(sockfd, buf, bufsize)) > 0) {
+        if (write(1, buf, readsize * sizeof(char)) == -1) {
+            perror("error writing to stdout");
+            return 1;
+        }
     }
 
-    if (close(connfd) != 0) {
-        perror("error closing connection");
+    if (readsize == -1) {
+        perror("error reading from server");
         return 1;
     }
+
+    if (shutdown(sockfd, SHUT_WR) != 0) {
+        perror("error shutting down socket");
+        close(sockfd);
+        return 1;
+    }
+
     if (close(sockfd) != 0) {
         perror("error closing connection");
         return 1;
