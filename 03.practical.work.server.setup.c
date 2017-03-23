@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #define SV_PORT 8784
 
@@ -38,8 +39,19 @@ int main() {
         int clifd = accept(sockfd, (struct sockaddr *)&ca, &clen);
         if (clifd < 0) {
             perror("error accepting connection");
+            continue;
         }
 
-        printf("client connected\n");
+        if (write(clifd, "Welcome\n", 8 * sizeof(char)) <= 0) {
+            perror("error writing to client");
+            continue;
+        }
+
+        if (close(clifd) != 0) {
+            perror("error closing client connection");
+            continue;
+        }
+
+        printf("client connection done\n");
     }
 }
