@@ -53,41 +53,73 @@ int main() {
     struct epoll_event *events = malloc(SV_MAXEVENTS * sizeof(struct epoll_event));
     size_t bufsize = BUFCOUNT * sizeof(char);
     char *buf = malloc(bufsize);
-    while (1) {
-        struct sockaddr_in ca;
-        socklen_t clen = sizeof(struct sockaddr_in);
-        int clifd = accept4(sockfd, (struct sockaddr *)&ca, &clen, SOCK_NONBLOCK);
-        if (clifd < 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // no connections waiting for accept
-            } else {
-                perror("error accepting connection");
-            }
-        } else {
-            printf("accepting client %d\n", clifd);
-            struct epoll_event copts = {0};
-            copts.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-            copts.data.fd = clifd;
-            if (epoll_ctl(pol, EPOLL_CTL_ADD, clifd, &copts) != 0) {
-                perror("cannot set fd events");
-            }
-        }
 
-        int pending = epoll_wait(pol, events, SV_MAXEVENTS, 0);
+    // register server socket for notifications
+    struct epoll_event ssopts = {0};
+    ssopts.events = EPOLLIN | EPOLLET;
+    ssopts.data.fd = sockfd;
+    if (epoll_ctl(pol, EPOLL_CTL_ADD, sockfd, &ssopts) != 0) {
+        perror("cannot set sockfd events");
+        return 1;
+    }
+
+    while (1) {
+        int pending = epoll_wait(pol, events, SV_MAXEVENTS, -1);
         if (pending < 0) {
             perror("error waiting for new event");
             continue;
         }
         for (int ei = 0; ei < pending; ei++) {
-            if (events[ei].events | EPOLLIN) {
-                int clifd = events[ei].data.fd;
+            uint32_t evcode = events[ei].events;
+            int clifd = events[ei].data.fd;
+            if (evcode & EPOLLERR || evcode & EPOLLHUP || !(evcode & EPOLLIN)) {
+                fprintf(stderr, "oops");
+                close(clifd);
+                if (clifd == sockfd) {
+                    return 1;
+                }
+                continue;
+            } else if (clifd == sockfd) {
+                // accept new connections
+                while (1) {
+                    struct sockaddr_in ca;
+                    socklen_t clen = sizeof(struct sockaddr_in);
+                    int newfd = accept4(sockfd, (struct sockaddr *)&ca, &clen, SOCK_NONBLOCK);
+                    if (newfd < 0) {
+                        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                            // no connections waiting for accept
+                            break;
+                        } else {
+                            perror("error accepting connection");
+                        }
+                    } else {
+                        printf("accepting client %d\n", newfd);
+                        struct epoll_event copts = {0};
+                        copts.events = EPOLLIN | EPOLLET;
+                        copts.data.fd = newfd;
+                        if (epoll_ctl(pol, EPOLL_CTL_ADD, newfd, &copts) != 0) {
+                            perror("cannot set fd events");
+                            close(newfd);
+                        }
+                    }
+                }
+            } else if (evcode & EPOLLIN) {
                 // save space for \0
                 ssize_t readsize = read(clifd, buf, bufsize - sizeof(char));
                 buf[readsize] = '\0';
-                if (readsize >= 0) {
+                if (readsize > 0) {
                     printf("%d: %s\n", clifd, buf);
+                } else if (readsize == 0) {
+                    printf("client connection done\n");
+                    epoll_ctl(pol, EPOLL_CTL_DEL, clifd, NULL);
+                    close(clifd);
                 } else {
-                    perror("clifd complained");
+                    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    } else {
+                        perror("clifd complained");
+                        epoll_ctl(pol, EPOLL_CTL_DEL, clifd, NULL);
+                        close(clifd);
+                    }
                 }
                 bool end = false;
                 for (ssize_t i = 0; i < readsize; i++) {
@@ -99,14 +131,6 @@ int main() {
                     printf("client connection done\n");
                     epoll_ctl(pol, EPOLL_CTL_DEL, clifd, NULL);
                     close(clifd);
-                } else {
-                    // rearm after EPOLLONESHOT
-                    events[ei].events = EPOLLIN | EPOLLET | EPOLLONESHOT;
-                    if (epoll_ctl(pol, EPOLL_CTL_MOD, clifd, &events[ei]) != 0) {
-                        perror("cannot reset fd events, abandoning connection");
-                        epoll_ctl(pol, EPOLL_CTL_DEL, clifd, NULL);
-                        close(clifd);
-                    }
                 }
             }
         }
