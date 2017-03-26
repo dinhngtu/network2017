@@ -73,7 +73,7 @@ int main() {
             }
         }
 
-        int pending = epoll_wait(pol, events, SV_MAXEVENTS, -1);
+        int pending = epoll_wait(pol, events, SV_MAXEVENTS, 0);
         if (pending < 0) {
             perror("error waiting for new event");
             continue;
